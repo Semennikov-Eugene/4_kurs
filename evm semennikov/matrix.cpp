@@ -1,15 +1,5 @@
 #include "matrix.h"
 
-double rho(double x, double t)
-{
-  return -3 * M_PI * exp (t) * sin (3 * x * M_PI);
-}
-
-double u (double x, double t)
-{
-  return cos (2 * M_PI * t) * sin (4 * M_PI * x);
-}
-
 double d_rho (double x, double t)
 {
   return -3 * M_PI * exp (t) * sin (3 * x * M_PI);
@@ -41,6 +31,15 @@ void Matrix::init_vector_G ()
 {
   double tau = scheme.tau;
   double h_x = scheme.h_x;
+
+  printf("solution_V\n");
+  for (int i = 0; i< Dim; i++)
+    printf("%lf ", solution_V[i]);
+
+  printf("\nsolution_G\n");
+  for (int i = 0; i< Dim; i++)
+    printf("%lf ", solution_G[i]);
+
   // основная часть
   for (int m = 1; m < Dim-1; m++)
     {
@@ -108,6 +107,7 @@ void Matrix::init_vector_V ()
 {
   // первая строка фиктивная
   matrix_vec_a[0] = 1;
+  // printf("AAAAAAAaa%lf\n", matrix_vec_a[0]);
   matrix_vec_b[0] = 0;
   matrix_vec_c[0] = 0;
   rhs_vector[0] = 0;
@@ -138,6 +138,8 @@ void Matrix::init_vector_V ()
                        / (h_x * h_x);
     }
 
+    // printf ("")
+
   // последняя строка тоже фиктивная
   matrix_vec_a[Dim - 1] = 1;
   matrix_vec_b[Dim - 1] = 0;
@@ -150,23 +152,47 @@ void Matrix::solve (bool mode)
 {
   std::vector<double> & solution = mode ? solution_V : solution_G;
   // Метод прогонки : вперед
+
+  printf ("\nsolving matrix mdoe %d\n", mode);
+  printf ("\n matrix a \n");
+  for (int i = 0; i< Dim; i++)
+    printf("%lf ", matrix_vec_a[i]);
+
+  printf ("\n\n\n\n matrix b \n");
+  for (int i = 0; i< Dim; i++)
+    printf("%lf ", matrix_vec_b[i]);
+
+  printf ("\n\n\n\n matrix c \n");
+  for (int i = 0; i< Dim; i++)
+    printf("%lf ", matrix_vec_c[i]);
+
+  printf ("\n\n\n\n rhs \n");
+  for (int i = 0; i< Dim; i++)
+    printf("%lf ", rhs_vector[i]);
+
+  printf ("\n\n");
+
   double znam = matrix_vec_a[0];
   matrix_vec_a[0] =  (-1 * matrix_vec_b[0]) / znam;
   matrix_vec_b[0] = rhs_vector[0] / znam;
+
   for (int i = 1; i < Dim - 1; i++)
     {
-      znam = matrix_vec_a[i] + matrix_vec_c[i-1] * matrix_vec_a[i-1];
+      znam = matrix_vec_a[i] + matrix_vec_c[i] * matrix_vec_a[i-1];
       matrix_vec_a[i] = (-1 * matrix_vec_b[i]) / znam;
-      double chis = rhs_vector[i] - matrix_vec_c[i-1] * matrix_vec_b[i-1];
+      double chis = rhs_vector[i] - matrix_vec_c[i] * matrix_vec_b[i-1];
       matrix_vec_b[i] = chis / znam;
     }
   // Метод прогонки : обратно
-  solution[Dim - 1] = (rhs_vector[Dim-1] -
-                       matrix_vec_c[Dim - 2] * matrix_vec_b[Dim -2]) /
-                      (matrix_vec_a[Dim - 1] - matrix_vec_c[Dim - 2] * matrix_vec_a[Dim - 2]);
-
+  solution[Dim - 1] = (rhs_vector[Dim - 1] - matrix_vec_c[Dim - 1]*matrix_vec_b[Dim - 2]) /
+                      (matrix_vec_a[Dim - 1] + matrix_vec_c[Dim - 1] * matrix_vec_a[Dim - 2]);
   for (int i = Dim - 2; i >=0; i--)
     {
       solution[i] = matrix_vec_a[i] * solution[i+1] + matrix_vec_b[i];
     }
+
+   printf ("\n\nsolution mode = %d\n", mode);
+    for (int i = 0; i< Dim; i++)
+      printf ("%lf ", solution [i]);
+    printf ("\n\n");
 }
