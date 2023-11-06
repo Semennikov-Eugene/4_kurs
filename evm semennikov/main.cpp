@@ -27,15 +27,34 @@ int main(int argc, char const *argv[])
       printf ("Can`t read initial values!\n");
       return -2;
     }
-    h_x = 1 / M_x;
-    tau = 1 / N;
 
-    P_gas gas(1, 1, C_rho, 1.4, mu, mode);
-    P_scheme scheme(M_x, N, h_x, tau);
+    h_x = 1. / M_x;
+    tau = 1. / N;
+
+    P_gas gas (1, 1, C_rho, 1.4, mu, mode);
+    P_scheme scheme (M_x, N, h_x, tau);
+    Matrix matrix (gas, scheme);
 
 
-
-
+//    info for vec_V will be calculated there
+    matrix.init_vector_G ();
+    //now solver works properly
+    matrix.solve (0);
+    matrix.calc_and_print_nev_C (0, 1);
+    // init and solve
+    matrix.init_vector_V ();
+    matrix.solve (1);
+    matrix.calc_and_print_nev_C (1, 1);
+    // step 1 passed go futher
+    for (int i = 2; i <= N; i++)
+      {
+        matrix.init_vector_G ();
+        matrix.solve (0);
+        matrix.calc_and_print_nev_C (0, i);
+        matrix.init_vector_V ();
+        matrix.solve (1);
+        matrix.calc_and_print_nev_C (1, i);
+      }
 
   return 0;
 }
