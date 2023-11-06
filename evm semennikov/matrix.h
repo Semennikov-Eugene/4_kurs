@@ -13,7 +13,7 @@ class Matrix
 
   double rho(double x, double t)
   {
-    return -3 * M_PI * exp (t) * sin (3 * x * M_PI);
+    return exp (t) * (cos (3 * x * M_PI) + 1.5);
   }
 
   double u (double x, double t)

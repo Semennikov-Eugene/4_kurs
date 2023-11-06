@@ -36,7 +36,7 @@ int main(int argc, char const *argv[])
     Matrix matrix (gas, scheme);
 
 
-//    info for vec_V will be calculated there
+//  info for vec_V will be calculated there
     matrix.init_vector_G ();
     //now solver works properly
     matrix.solve (0);
